@@ -66,7 +66,13 @@ class Chat extends React.Component {
                 key={message.id}
                 className={message.author === currentUser ? 'sent' : 'replies'}>
                 <img src="http://emilcarlsson.se/assets/mikeross.png" />
-                <p>{message.content}</p>
+                <p>
+                    {message.content}
+                    <br/>
+                    <small>
+                        {Math.round((new Date().getTime() - new Date(message.timestamp).getTime())/600000)} minutes ago
+                    </small>
+                </p>
             </li>
         ));
     }

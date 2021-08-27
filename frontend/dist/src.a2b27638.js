@@ -29916,7 +29916,7 @@ var Chat = /*#__PURE__*/function (_React$Component) {
           className: message.author === currentUser ? 'sent' : 'replies'
         }, /*#__PURE__*/_react.default.createElement("img", {
           src: "http://emilcarlsson.se/assets/mikeross.png"
-        }), /*#__PURE__*/_react.default.createElement("p", null, message.content));
+        }), /*#__PURE__*/_react.default.createElement("p", null, message.content, /*#__PURE__*/_react.default.createElement("br", null), /*#__PURE__*/_react.default.createElement("small", null, Math.round((new Date().getTime() - new Date(message.timestamp).getTime()) / 600000), " minutes ago")));
       });
     });
 
