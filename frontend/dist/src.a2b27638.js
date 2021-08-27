@@ -29896,7 +29896,16 @@ var Chat = /*#__PURE__*/function (_React$Component) {
 
     _defineProperty(_assertThisInitialized(_this), "sendMessageHandler", function (e) {
       e.preventDefault();
-      var messageObject = {};
+      var messageObject = {
+        from: 'admin',
+        content: _this.state.message
+      };
+
+      _websocket.default.newChatMessage(messageObject);
+
+      _this.setState({
+        message: ''
+      });
     });
 
     _defineProperty(_assertThisInitialized(_this), "renderMessages", function (messages) {

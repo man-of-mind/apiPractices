@@ -50,8 +50,13 @@ class Chat extends React.Component {
     sendMessageHandler = e => {
         e.preventDefault();
         const messageObject = {
-            
+            from: 'admin',
+            content: this.state.message
         }
+        WebSocketInstance.newChatMessage(messageObject);
+        this.setState({
+            message: ''
+        });
     }
 
     renderMessages = (messages) => {
