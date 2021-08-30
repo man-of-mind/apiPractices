@@ -1,12 +1,14 @@
 import React from "react";
 import WebSocketInstance from "../websocket";
+import { connect } from 'react-redux';
+import Hoc from '../hoc/hoc';
 
 
 class Chat extends React.Component {
 
     constructor(props) {
         super(props)
-        this.state = {}
+        this.state = {message: ''}
         this.waitForSocketConnection(() => {
             WebSocketInstance.addCallbacks(
                 this.setMessages.bind(this),
@@ -33,15 +35,23 @@ class Chat extends React.Component {
                     console.log("connection is secure");
                     callback();
                     return;
-                }else {
+                }else {WebSocketInstance.connect();
                     console.log("waiting for connection....");
                     component.waitForSocketConnection(callback);
                 }
             }, 100);
     }
 
+    scrollToBottom = () => {
+        this.messageEnd.scrollIntoView({behavior: "smooth"});
+    }
+
+    componentDidUpdate () {
+        this.scrollToBottom();
+    }
+
     componentDidMount() {
-        WebSocketInstance.connect();
+        this.scrollToBottom();
     }
 
     changeMessagehandler = event => {
@@ -62,18 +72,36 @@ class Chat extends React.Component {
         });
     }
 
+
+
+    renderTimestamp = timestamp => {
+        let prefix = "";
+        const timeDiff = Math.round((new Date().getTime() - new Date(timestamp).getTime())/600000)
+        if (timeDiff < 60 && timeDiff > 1) {
+            prefix = `${timeDiff} minutes ago`;
+        } else if (timeDiff < 24*60 && timeDiff > 60) {
+            prefix = `${Math.round(timeDiff/60)} hours ago`;
+        } else if (timeDiff < 31*24*60 && timeDiff > 24*60) {
+            prefix = `${Math.round(timeDiff/60*24)} days ago`;
+        } else {
+            prefix = `${new Date(timestamp)}`;
+        }
+        return prefix;
+    }
+
     renderMessages = (messages) => {
-        const currentUser = "admin";
-        return messages.map(message => (
+        const currentUser = this.props.username;
+        return messages.map((message, i, arr) => (
             <li
                 key={message.id}
+                style={{marginBottom: arr.length - 1 === i ? '300px' : '15px'}}
                 className={message.author === currentUser ? 'sent' : 'replies'}>
                 <img src="http://emilcarlsson.se/assets/mikeross.png" />
                 <p>
                     {message.content}
                     <br/>
                     <small>
-                        {Math.round((new Date().getTime() - new Date(message.timestamp).getTime())/600000)} minutes ago
+                        {this.renderTimestamp(message.timestamp)}
                     </small>
                 </p>
             </li>
@@ -83,13 +111,16 @@ class Chat extends React.Component {
     render(){
         const messages = this.state.messages;
         return(
-            <div>
+            <Hoc>
                 <div className="messages">
                     <ul id="chat-log">
                     { 
                         messages && 
                         this.renderMessages(messages) 
                     }
+                    <div style={{ float: "left", clear: "both"}}
+                        ref={(el) => {this.messageEnd = el; }}>
+                    </div>
                     </ul>
                 </div>
                 <div className="message-input">
@@ -109,9 +140,15 @@ class Chat extends React.Component {
                         </div>
                     </form>
                 </div>
-            </div>
+            </Hoc>
         )
     }
 }
 
-export default Chat; 
+const mapStateToProps = state => {
+    return {
+        username: state.username
+    }
+}
+
+export default connect(mapStateToProps)(Chat); 
