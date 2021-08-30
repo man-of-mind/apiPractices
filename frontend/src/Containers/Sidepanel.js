@@ -128,7 +128,9 @@ class Sidepanel extends React.Component {
 const mapStateToProps = state => {
     return {
         isAuthenticated: state.token !== null,
-        loading: state.loading
+        loading: state.loading,
+        token: state.token,
+        username: state.username
     }
 }
 
