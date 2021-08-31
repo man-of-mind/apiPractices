@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import * as actions from '../store/actions/auth';
 import Contact from '../Components/Contact';
 import Hoc from '../hoc/hoc';
+import axios from 'axios';
 
 const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 
@@ -12,6 +13,33 @@ class Sidepanel extends React.Component {
 
     state = { 
         loginForm: true,
+        chats: []
+    }
+
+    componentDidMount() {
+        if (this.props.token !== null && this.props.username !== null) {
+            this.getUserChats(this.props.token, this.props.username);
+        }
+    }
+
+    componentWillReceiveProps (newProps) {
+        if (newProps.token !== null && newProps.username !== null) {
+            this.getUserChats(newProps.token, newProps.username);
+        }
+    }
+
+    getUserChats = (token, username) => {
+        axios.defaults.headers = {
+            "Content-Type": "application/json",
+            Authorization : `Token ${token}`
+        };
+        axios.get(`http://127.0.0.1:8000/chat/?username=${username}`)
+        .then(res => {
+            console.log(res.data);
+            this.setState({
+                chats: res.data
+            })
+        }) 
     }
 
     changeForm = () => {
@@ -36,8 +64,19 @@ class Sidepanel extends React.Component {
     }
 
     render() {
+        const activeChat = this.state.chats.map(c => {
+            return (
+                <Contact 
+                    key = {c.id}
+                    name="Dammy"
+                    status="online"
+                    picUrl = "http://emilcarlsson.se/assets/louislitt.png"
+                    chatURL = {`/${c.id}`}
+                />
+             )
+        })
         return (
-            <Hoc>
+            <div>
             <div id="sidepanel">
             <div id="profile">
                 <div className="wrap">
@@ -101,7 +140,8 @@ class Sidepanel extends React.Component {
             </div>
             <div id="contacts">
                 <ul>
-                    <Contact 
+                    {activeChat}
+                    {/*<Contact 
                         name="Dammy"
                         status="online"
                         picUrl = "http://emilcarlsson.se/assets/louislitt.png"
@@ -112,7 +152,7 @@ class Sidepanel extends React.Component {
                         status="busy"
                         picUrl = "http://emilcarlsson.se/assets/harveyspecter.png"
                         chatURL = "/bethel/"
-                    />
+                    /> */}
                 </ul>
             </div>
             <div id="bottom-bar">
@@ -120,7 +160,7 @@ class Sidepanel extends React.Component {
                 <button id="settings"><i className="fa fa-cog fa-fw" aria-hidden="true"></i> <span>Settings</span></button>
             </div>
             </div>
-            </Hoc>
+            </div>
         );
     };
 }

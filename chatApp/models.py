@@ -14,7 +14,7 @@ class Contact(models.Model):
 
 
 class Message(models.Model):
-    contact = models.ForeignKey(Contact, related_name='author_messages', on_delete=models.CASCADE)
+    contact = models.ForeignKey(Contact, related_name='messages', on_delete=models.CASCADE)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -26,10 +26,7 @@ class Message(models.Model):
 class Chat(models.Model):
     participants = models.ManyToManyField(Contact, related_name="chats")
     messages = models.ManyToManyField(Message, blank=True)
-
     
-    def get_last_30_messages(self):
-        return self.messages.objects.order_by('-timestamp').all()[:30]
 
     def __str__(self):
         return "{}".format(self.pk)

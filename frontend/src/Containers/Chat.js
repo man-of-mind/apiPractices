@@ -6,16 +6,24 @@ import Hoc from '../hoc/hoc';
 
 class Chat extends React.Component {
 
-    constructor(props) {
-        super(props)
-        this.state = {message: ''}
+    state = { message: '' }
+
+    initializeChat() {
         this.waitForSocketConnection(() => {
-            WebSocketInstance.addCallbacks(
-                this.setMessages.bind(this),
-                this.addmessasge.bind(this));
-            WebSocketInstance.fetchMessages(this.props.currentUser);
+            WebSocketInstance.addCallbacks(this.setMessages.bind(this),this.addmessasge.bind(this));
+            WebSocketInstance.fetchMessages(
+                this.props.username,
+                this.props.match.params.chatID
+            );
         });
+        WebSocketInstance.connect(this.props.match.params.chatID);
+    } 
+
+    constructor(props) {
+        super(props);
+        this.initializeChat();
     }
+
 
     setMessages(messages) {
         this.setState({messages: messages.reverse()});
@@ -63,8 +71,9 @@ class Chat extends React.Component {
     sendMessageHandler = e => {
         e.preventDefault();
         const messageObject = {
-            from: 'admin',
-            content: this.state.message
+            from: this.props.username,
+            content: this.state.message,
+            chatId: this.props.match.params.chatID
         }
         WebSocketInstance.newChatMessage(messageObject);
         this.setState({
@@ -108,6 +117,13 @@ class Chat extends React.Component {
         ));
     }
 
+    componentWillReceiveProps(newProps) {
+        console.log(newProps);
+        this.initializeChat();
+    }
+
+    
+
     render(){
         const messages = this.state.messages;
         return(
@@ -135,7 +151,7 @@ class Chat extends React.Component {
                                 placeholder="Write your message..." />
                             <i className="fa fa-paperclip attachment" aria-hidden="true"></i>
                             <button id="chat-message-submit" className="submit">
-                                <i className="fa fa-paper-plane" aria-hidden="true"></i>
+                            <i className="fa fa-paper-plane" aria-hidden="true"></i>
                             </button>
                         </div>
                     </form>
